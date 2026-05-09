@@ -33,8 +33,9 @@ func main() {
 				Usage: "Path to PKCS12 keychain file (required: contains signing certificate and private key)",
 			},
 			&cli.StringFlag{
-				Name:  "p12-password",
-				Usage: "Password to unlock the PKCS12 keychain file (required if --p12-file is set)",
+				Name:    "p12-password",
+				EnvVars: []string{"P12_PASSWORD"},
+				Usage:   "Password to unlock the PKCS12 keychain file (required if --p12-file is set)",
 			},
 			&cli.StringSliceFlag{
 				Name:  "profile",
