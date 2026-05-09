@@ -34,6 +34,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  "p12-password",
+				EnvVars: []string{"P12_PASSWORD"},
 				Usage: "Password to unlock the PKCS12 keychain file (required if --p12-file is set)",
 			},
 			&cli.StringSliceFlag{

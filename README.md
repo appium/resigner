@@ -61,6 +61,19 @@ resigner \
   /path/to/WebDriverAgentRunner-Runner.app
 ```
 
+You can provide the password via environment variable instead of `--p12-password`:
+
+```bash
+P12_PASSWORD="<password of p12>" resigner \
+  --p12-file "<path to p12 file>" \
+  --profile "<path to provisioning profiles>" \
+  --force \
+  --bundle-id-remap "com.facebook.WebDriverAgentRunner=<valid bundle id for the profile>" \
+  --bundle-id-remap "com.facebook.WebDriverAgentRunner.xctrunner=<valid bundle id for the profile>" \
+  --bundle-id-remap "com.facebook.WebDriverAgentLib=<valid bundle id for the profile>" \
+  /path/to/WebDriverAgentRunner-Runner.app
+```
+
 `<valid bundle id for the profile>` should match the provisioning profile app identifier.
 
 ## Inspect Current Signatures
@@ -78,7 +91,7 @@ This prints each discovered bundle path with:
 
 ## Create PKCS#12 (.p12)
 
-Use the `.p12` with `--p12-file`, and its password with `--p12-password`.
+Use the `.p12` with `--p12-file`, and its password with `--p12-password` or `P12_PASSWORD`.
 
 ### Option 1: Keychain Access (recommended)
 
