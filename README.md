@@ -1,6 +1,6 @@
 # resigner
 
-Resigner is a Go library for re-signing iOS .ipa files, mainly for Appium/WebDriverAgentRunner workflows.
+Resigner is a Go library for re-signing iOS .ipa/.app files, mainly for Appium/WebDriverAgentRunner workflows.
 
 Please do not use this for production app signing.
 
@@ -60,7 +60,7 @@ resigner \
   /path/to/WebDriverAgentRunner-Runner.app
 ```
 
-You can provide the password via environment variable instead of `--p12-password`:
+You can provide the password via an environment variable instead of `--p12-password`:
 
 ```bash
 P12_PASSWORD="<password of p12>" resigner \
@@ -102,10 +102,13 @@ Use the `.p12` with `--p12-file`, and its password with `--p12-password` or `P12
 ### Option 2: OpenSSL (if you already have PEM files)
 
 ```bash
+openssl x509 -in certificate.cer -inform DER -out certificate.pem
+
 openssl pkcs12 -export \
-  -inkey key.pem \
-  -in cert.pem \
-  -out mysign.p12
+  -in certificate.pem \
+  -inkey private.key \
+  -out sign.p12 \
+  -passout pass:mypassword
 ```
 
 ### Option 3: Free Apple Account (Xcode-managed, macOS)
