@@ -6,9 +6,8 @@ Please do not use this for production app signing.
 
 ## Requirements
 
-- macOS (Not tested on other platforms, but might work with Go's cross-compilation)
+- Windows, macOS, Linux
 - go 1.26.1 or later
-- Xcode command line tools (for `codesign` and `security`)
 
 ## Download Pre-built Binaries
 - [Releases](https://github.com/KazuCocoa/resigner/releases)
@@ -93,7 +92,7 @@ This prints each discovered bundle path with:
 
 Use the `.p12` with `--p12-file`, and its password with `--p12-password` or `P12_PASSWORD`.
 
-### Option 1: Keychain Access (recommended)
+### Option 1: Keychain Access (recommended, macOS)
 
 - Open Keychain Access.
 - Find your Apple Development certificate with a private key.
@@ -109,7 +108,7 @@ openssl pkcs12 -export \
   -out mysign.p12
 ```
 
-### Option 3: Free Apple Account (Xcode-managed)
+### Option 3: Free Apple Account (Xcode-managed, macOS)
 
 - Add your Apple ID in `Xcode > Settings > Accounts`.
 - Enable `Automatically manage signing` for your target and personal team.
