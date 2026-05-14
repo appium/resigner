@@ -1,7 +1,7 @@
 .PHONY: all ci default clean test compress
 
-GIT_COMMIT  := $(shell git describe --always --long --abbrev=12 --dirty)
-GOFLAGS     ?= -trimpath -ldflags="-s -w -X main.VCSRevision=$(GIT_COMMIT)"
+GIT_TAG     := $(shell git describe --tags --always 2>/dev/null || echo "unknown")
+GOFLAGS     ?= -trimpath -ldflags="-s -w -X main.VCSRevision=$(GIT_TAG)"
 NATDIST     := $(shell go env GOHOSTOS GOHOSTARCH | paste -sd- -)
 
 CGO_CFLAGS  := $(shell go env CGO_CFLAGS) -mmacos-version-min=10.15
