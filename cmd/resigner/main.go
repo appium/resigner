@@ -22,7 +22,10 @@ import (
 var VCSRevision string = "unknown"
 
 func main() {
-	cli.VersionFlag = &cli.BoolFlag{} // disable to avoid conflict with verbose flags
+	cli.VersionFlag = &cli.BoolFlag{
+		Name:  "version",
+		Usage: "Print version",
+	} // no short alias to avoid conflict with verbose flags
 
 	app := &cli.App{
 		Usage:   "resigner <target>",
