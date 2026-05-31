@@ -7,7 +7,7 @@ require (
 	github.com/klauspost/compress v1.18.5
 	github.com/minio/sha256-simd v1.0.1
 	github.com/urfave/cli/v2 v2.27.7
-	go.uber.org/zap v1.27.1
+	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.49.0
 	howett.net/plist v1.0.1
 )
