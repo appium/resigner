@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/github/smimesign v0.2.0
-	github.com/klauspost/compress v1.18.6
+	github.com/klauspost/compress v1.19.1
 	github.com/minio/sha256-simd v1.0.1
 	github.com/urfave/cli/v2 v2.27.7
 	go.uber.org/zap v1.28.0
