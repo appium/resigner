@@ -1,4 +1,8 @@
-# resigner
+<p align="center">
+  <img src="assets/resigner-icon.svg" alt="resigner icon: an app package being re-signed with a verified certificate" width="160">
+</p>
+
+<h1 align="center">resigner</h1>
 
 Resigner is a Go library for re-signing iOS .ipa/.app files, mainly for Appium/WebDriverAgentRunner workflows.
 
