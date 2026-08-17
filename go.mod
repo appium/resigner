@@ -8,7 +8,7 @@ require (
 	github.com/minio/sha256-simd v1.0.1
 	github.com/urfave/cli/v2 v2.27.7
 	go.uber.org/zap v1.28.0
-	golang.org/x/crypto v0.54.0
+	golang.org/x/crypto v0.55.0
 	howett.net/plist v1.0.1
 )
 
