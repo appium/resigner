@@ -117,7 +117,7 @@ func main() {
 			ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 			defer cancel()
 
-			targetFilename := c.Args().Get(0)
+			targetFilename := filepath.Clean(c.Args().Get(0))
 			root := fs.DirFS(filepath.Dir(targetFilename))
 			targetPath := filepath.Base(targetFilename)
 
@@ -146,7 +146,7 @@ func main() {
 			preserveEntitlements := entitlementsFilename == "preserve"
 
 			var entitlements macho.Entitlements
-			if entitlementsFilename != "" {
+			if entitlementsFilename != "" && !preserveEntitlements {
 				entitlementsData, err := os.ReadFile(entitlementsFilename)
 				if err != nil {
 					return err
