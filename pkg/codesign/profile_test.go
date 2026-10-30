@@ -663,6 +663,15 @@ func TestSingleProfileProviderBehavior(t *testing.T) {
 	if len(none) != 0 {
 		t.Fatal("expected bundle id mismatch to filter out profile")
 	}
+
+	none, err = provider.Profiles(ctx, "", "", "udid-1", "appletvos")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(none) != 0 {
+		t.Fatal("expected platform mismatch to filter out profile even when bundleID is empty")
+	}
 }
 
 type stubProfileProvider struct {

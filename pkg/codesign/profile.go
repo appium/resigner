@@ -338,7 +338,7 @@ func NewProfileFingerprint(teamID, sha1, sha256, certFingerprint string) Profile
 }
 
 type ProfileProvider interface {
-	Profiles(ctx context.Context, teamID, bundleID, udid, platform string) ([]ProfileFingerprint, error)
+	Profiles(ctx context.Context, bundleID, teamID, udid, platform string) ([]ProfileFingerprint, error)
 	Profile(ctx context.Context, fingerprint ProfileFingerprint) (*Profile, bool, error)
 
 	Certificate(ctx context.Context, fingerprint ProfileFingerprint) (*x509.Certificate, bool, error)
@@ -545,22 +545,12 @@ func (p *SingleProfileProvider) Profiles(ctx context.Context, bundleID, teamID, 
 		return nil, nil
 	}
 
-	if bundleID != "" {
-		if teamID == "" {
-			if !p.profile.CanSignBundleID(bundleID, p.profile.GetTeamID()) {
-				return nil, nil
-			}
-		} else {
-			if !p.profile.CanSignBundleID(bundleID, teamID) {
-				return nil, nil
-			}
-		}
+	if !matchesBundleAndTeam(p.profile, bundleID, teamID) {
+		return nil, nil
+	}
 
-		if platform != "" {
-			if !p.profile.CanSignPlatform(platform) {
-				return nil, nil
-			}
-		}
+	if platform != "" && !p.profile.CanSignPlatform(platform) {
+		return nil, nil
 	}
 
 	fingerprints := make([]ProfileFingerprint, 0, len(p.profile.Fingerprints()))
