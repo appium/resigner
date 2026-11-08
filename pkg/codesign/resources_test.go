@@ -411,3 +411,55 @@ func TestCodeResourcesFixtures_RoundTrip(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateCodeResources_NestedPathsUseForwardSlashes(t *testing.T) {
+	tmp := t.TempDir()
+
+	appInfo, err := plist.Marshal(InfoPlist{BundleExecutable: "Runner"}, plist.XMLFormat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pluginInfo, err := plist.Marshal(InfoPlist{BundleExecutable: "Plugin"}, plist.XMLFormat)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	writeFile(t, tmp, "Info.plist", appInfo)
+	writeFile(t, tmp, "Runner", []byte("binary"))
+	writeFile(t, tmp, "PlugIns/Plugin.xctest/Info.plist", pluginInfo)
+	writeFile(t, tmp, "PlugIns/Plugin.xctest/Plugin", []byte("binary"))
+	writeFile(t, tmp, "PlugIns/Plugin.xctest/_CodeSignature/CodeResources", []byte("nested-signature"))
+	writeFile(t, tmp, "PlugIns/Plugin.xctest/Frameworks/Lib.framework/Info.plist", []byte("lib"))
+
+	app, err := GenerateCodeResources(fs.DirFS(tmp), ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{
+		"PlugIns/Plugin.xctest/_CodeSignature/CodeResources",
+		"PlugIns/Plugin.xctest/Frameworks/Lib.framework/Info.plist",
+	} {
+		if _, ok := app.FilesV2[key]; !ok {
+			t.Errorf("app files2 missing %q, got %v", key, mapKeys(app.FilesV2))
+		}
+	}
+
+	plugin, err := GenerateCodeResources(fs.DirFS(tmp), filepath.Join("PlugIns", "Plugin.xctest"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := plugin.FilesV2["Frameworks/Lib.framework/Info.plist"]; !ok {
+		t.Errorf("plugin files2 missing Frameworks/Lib.framework/Info.plist, got %v", mapKeys(plugin.FilesV2))
+	}
+	if _, ok := plugin.FilesV2["_CodeSignature/CodeResources"]; ok {
+		t.Error("plugin's own CodeResources should be excluded")
+	}
+}
+
+func mapKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
