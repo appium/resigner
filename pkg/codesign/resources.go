@@ -127,7 +127,8 @@ func GenerateCodeResources(root fs.ReadWriteFS, path string) (*CodeResources, er
 			}
 
 			relPath, _ := filepath.Rel(path, subPath)
-			if relPath == info.BundleExecutable || relPath == filepath.Join("_CodeSignature", "CodeResources") {
+			relPath = filepath.ToSlash(relPath)
+			if relPath == info.BundleExecutable || relPath == "_CodeSignature/CodeResources" {
 				return nil
 			}
 
