@@ -159,7 +159,7 @@ func GenerateCodeResources(root fs.ReadWriteFS, path string) (*CodeResources, er
 				select {
 				case <-ctx.Done():
 					return
-				case hashed <- fileEntry{relPath: relPath, hsh1: h1, hsh2: h2}:
+				case hashed <- fileEntry{relPath: filepath.ToSlash(relPath), hsh1: h1, hsh2: h2}:
 				}
 			}
 		}()
@@ -223,7 +223,7 @@ func GenerateCodeResources(root fs.ReadWriteFS, path string) (*CodeResources, er
 }
 
 func (r *CodeResources) computeHashes(root fs.FS, base, path string) ([]byte, []byte, error) {
-	f, err := root.Open(filepath.Join(base, path))
+	f, err := root.Open(filepath.ToSlash(filepath.Join(base, path)))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -258,6 +258,8 @@ func (r *CodeResources) AddResource(root fs.FS, base, path string) error {
 		return err
 	}
 
+	// Resource keys and rules use slash-separated paths on every host.
+	path = filepath.ToSlash(path)
 	ruleV1, _ := r.RulesV1.Rule(path)
 	if !ruleV1.Omit {
 		r.FilesV1[path] = FileResourceV1{
@@ -279,6 +281,7 @@ func (r *CodeResources) AddResource(root fs.FS, base, path string) error {
 }
 
 func (r *CodeResources) SetResource(filename string, hash, hash2 []byte, optional bool) {
+	filename = filepath.ToSlash(filename)
 	if r.FilesV1 == nil {
 		r.FilesV1 = make(map[string]FileResourceV1)
 	}
