@@ -98,6 +98,7 @@ func TestParseFileProfileProviderSpec_NotFound(t *testing.T) {
 func TestParseFileProfileProviderSpec_HomeExpansion(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 
 	data, err := os.ReadFile("testdata/embedded.mobileprovision")
 	if err != nil {

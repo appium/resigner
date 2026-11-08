@@ -30,7 +30,7 @@ func UnzipIPA(file io.ReaderAt, size int64, dst fs.ReadWriteFS, path string) (st
 		}
 	}
 
-	matches, err := stdfs.Glob(dst, filepath.Join("Payload", "*.app"))
+	matches, err := stdfs.Glob(dst, "Payload/*.app")
 	if err != nil {
 		return "", err
 	}

@@ -2,6 +2,8 @@ package codesign
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"crypto/sha256"
 	"os"
 	"path/filepath"
 	"testing"
@@ -210,14 +212,14 @@ func TestCodeResourcesSetResource_FillsBothVersions(t *testing.T) {
 
 	h1 := []byte{1, 2, 3}
 	h2 := []byte{4, 5, 6, 7}
-	resources.SetResource("foo.txt", h1, h2, true)
+	resources.SetResource(filepath.Join("assets", "foo.txt"), h1, h2, true)
 
-	v1, ok := resources.FilesV1["foo.txt"]
+	v1, ok := resources.FilesV1["assets/foo.txt"]
 	if !ok {
 		t.Fatal("expected file in v1 map")
 	}
 
-	v2, ok := resources.FilesV2["foo.txt"]
+	v2, ok := resources.FilesV2["assets/foo.txt"]
 	if !ok {
 		t.Fatal("expected file in v2 map")
 	}
@@ -249,10 +251,10 @@ func TestCodeResourcesAddResource_RespectsRules(t *testing.T) {
 
 	resources := CodeResources{RulesV1: DefaultRulesV1(), RulesV2: DefaultRulesV2()}
 
-	if err := resources.AddResource(os.DirFS(tmp), ".", "en.lproj/locversion.plist"); err != nil {
+	if err := resources.AddResource(os.DirFS(tmp), ".", filepath.FromSlash("en.lproj/locversion.plist")); err != nil {
 		t.Fatal(err)
 	}
-	if err := resources.AddResource(os.DirFS(tmp), ".", "en.lproj/strings.txt"); err != nil {
+	if err := resources.AddResource(os.DirFS(tmp), ".", filepath.FromSlash("en.lproj/strings.txt")); err != nil {
 		t.Fatal(err)
 	}
 	if err := resources.AddResource(os.DirFS(tmp), ".", ".DS_Store"); err != nil {
@@ -305,6 +307,8 @@ func TestGenerateCodeResources_EndToEnd(t *testing.T) {
 	writeFile(t, tmp, "en.lproj/locversion.plist", []byte("locversion"))
 	writeFile(t, tmp, "en.lproj/strings.txt", []byte("localized text"))
 	writeFile(t, tmp, "assets/data.txt", []byte("payload"))
+	const nestedResource = "PlugIns/Runner.xctest/Frameworks/Lib.framework/Info.plist"
+	writeFile(t, tmp, nestedResource, []byte("nested payload"))
 
 	resources, err := GenerateCodeResources(fs.DirFS(tmp), ".")
 	if err != nil {
@@ -355,6 +359,34 @@ func TestGenerateCodeResources_EndToEnd(t *testing.T) {
 
 	if len(asset.Hash2) != 32 {
 		t.Fatal("expected SHA256 hash in v2 resource")
+	}
+
+	// Inspect the serialized manifest, including nested bundle resource digests.
+	encoded, err := plist.Marshal(resources, plist.XMLFormat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded CodeResources
+	if _, err := plist.Unmarshal(encoded, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	for name := range decoded.FilesV1 {
+		if bytes.ContainsRune([]byte(name), '\\') {
+			t.Errorf("files key contains a backslash: %q", name)
+		}
+	}
+	for name := range decoded.FilesV2 {
+		if bytes.ContainsRune([]byte(name), '\\') {
+			t.Errorf("files2 key contains a backslash: %q", name)
+		}
+	}
+	h1 := sha1.Sum([]byte("nested payload"))
+	h2 := sha256.Sum256([]byte("nested payload"))
+	if got := decoded.FilesV1[nestedResource]; !bytes.Equal(got.Hash, h1[:]) {
+		t.Errorf("nested resource SHA-1 mismatch: %x", got.Hash)
+	}
+	if got := decoded.FilesV2[nestedResource]; !bytes.Equal(got.Hash, h1[:]) || !bytes.Equal(got.Hash2, h2[:]) {
+		t.Errorf("nested resource digests mismatch: %+v", got)
 	}
 
 	if _, err := stdlibfs.Stat(fs.DirFS(tmp), "_CodeSignature/CodeResources"); err != nil {

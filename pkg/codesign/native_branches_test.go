@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -372,7 +373,7 @@ func TestSignChildren_BranchErrors(t *testing.T) {
 				return os.MkdirAll(filepath.Join(root, "My.app", "Frameworks", "A.framework"), 0o755)
 			},
 			onlyVerify: false,
-			expected:   "failed to resign \"Frameworks/A.framework\"",
+			expected:   fmt.Sprintf("failed to resign %q", filepath.FromSlash("Frameworks/A.framework")),
 		},
 		{
 			name: "dylib verify branch",
@@ -383,7 +384,7 @@ func TestSignChildren_BranchErrors(t *testing.T) {
 				return os.WriteFile(filepath.Join(root, "My.app", "Frameworks", "A.dylib"), []byte("not-macho"), 0o644)
 			},
 			onlyVerify: true,
-			expected:   "failed to verify \"Frameworks/A.dylib\"",
+			expected:   fmt.Sprintf("failed to verify %q", filepath.FromSlash("Frameworks/A.dylib")),
 		},
 		{
 			name: "xctest branch",
@@ -391,7 +392,7 @@ func TestSignChildren_BranchErrors(t *testing.T) {
 				return os.MkdirAll(filepath.Join(root, "My.app", "PlugIns", "B.xctest"), 0o755)
 			},
 			onlyVerify: false,
-			expected:   "failed to resign \"PlugIns/B.xctest\"",
+			expected:   fmt.Sprintf("failed to resign %q", filepath.FromSlash("PlugIns/B.xctest")),
 		},
 		{
 			name: "appex branch",
@@ -399,7 +400,7 @@ func TestSignChildren_BranchErrors(t *testing.T) {
 				return os.MkdirAll(filepath.Join(root, "My.app", "PlugIns", "C.appex"), 0o755)
 			},
 			onlyVerify: false,
-			expected:   "failed to resign \"PlugIns/C.appex\"",
+			expected:   fmt.Sprintf("failed to resign %q", filepath.FromSlash("PlugIns/C.appex")),
 		},
 	}
 
