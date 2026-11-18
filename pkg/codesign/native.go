@@ -317,7 +317,7 @@ func (c *NativeCodeSigner) SignPath(ctx context.Context, logger *zap.Logger, roo
 			return visit()
 		})
 
-		if !needsResign {
+		if !needsResign && (!config.Force || config.OnlyVerify) {
 			logger.Info("Path does not need resigning")
 			return nil
 		}
@@ -910,17 +910,12 @@ func (s dylibStrategy) sign(ctx context.Context, logger *zap.Logger, root fs.Rea
 type xctestStrategy struct{}
 
 func (s xctestStrategy) sign(ctx context.Context, logger *zap.Logger, root fs.ReadWriteFS, path string, config SigningConfig) error {
-	cfg := SigningConfig{
-		BundleIDMap:     config.BundleIDMap,
-		Force:           config.Force,
-		OnlyVerify:      config.OnlyVerify,
-		UDID:            config.UDID,
-		TeamID:          config.TeamID,
-		Keychain:        config.Keychain,
-		ProfileProvider: config.ProfileProvider,
-	}
+	// XCTest is a loaded library: inherit the runner's identity, not app entitlements.
 	var c NativeCodeSigner
-	return c.SignApp(ctx, logger, root, path, cfg)
+	if err := c.signChildren(ctx, logger, root, path, config); err != nil {
+		return err
+	}
+	return (frameworkStrategy{}).sign(ctx, logger, root, path, config)
 }
 
 type appexStrategy struct{}
